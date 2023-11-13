@@ -1,0 +1,12 @@
+compile_commands.json
+.pydevproject
+.ccls-cache
+.project
+.vscode
+.cproject
+.settings
+build
+.ipynb_checkpoints
+pyepg.cpp
+.mypy_cache
+
