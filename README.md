@@ -13,6 +13,16 @@ Authors: Tony Stöcker, Ed Pracht, DZNE Bonn
     make install
     cd ..
 ```
+If write permission to /usr/local is not available, install directory can be defined in the command line. For example:
+```
+    mkdir build
+    cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/any_defined_directory ..
+    make
+    make install
+    cd ..
+```
+and comment out ```SET(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local)``` in the CMakeLists.txt in main directory.
 The install is optional and not needed for the Cython wrapper
 
 ### Cython wrapper 
