@@ -23,6 +23,7 @@ If write permission to /usr/local is not available, install directory can be def
     cd ..
 ```
 and comment out ```SET(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local)``` in the CMakeLists.txt in main directory.
+
 The install is optional and not needed for the Cython wrapper
 
 ### Cython wrapper 
