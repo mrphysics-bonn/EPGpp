@@ -7,16 +7,17 @@ from libcpp.vector cimport vector
 cdef extern from "epg.h":
    
     cppclass EPG:
-        EPG(double, double, double) except +
+        EPG(double, double, double, double) except +
         EPG(EPG&) except +
         operator=(EPG) except +
-        void SetParameters(double, double, double)
+        void SetParameters(double, double, double, double)
         void DeleteStates()
 
         int  GetStep()
         double GetM0()
         double GetT1()
         double GetT2()
+        double GetTR()
 
         bool GetVerbose()
         void SetVerbose(bool)
@@ -24,29 +25,31 @@ cdef extern from "epg.h":
         void NullTransverse()
         void SetStep(int)
 
-        double GetMagA(int,bool)
-        double GetMagB(int,bool)
+        double GetMagFa(int)
+        double GetMagFb(int)
+        double GetMagZa(int)
+        double GetMagZb(int)
 
-        double GetReFA(int)
-        double GetImFA(int)
-        double GetReFB(int)
-        double GetImFB(int)
+        double GetReFa(int)
+        double GetImFa(int)
+        double GetReFb(int)
+        double GetImFb(int)
 
-        double GetReZA(int)
-        double GetImZA(int)
-        double GetReZB(int)
-        double GetImZB(int)
+        double GetReZa(int)
+        double GetImZa(int)
+        double GetReZb(int)
+        double GetImZb(int)
 
-        double GetNextMagA(double, double, int, bool)
+        double GetNextMagFA(double, double, int)
 
         double GetPhase()
 
-        void Step(double, double, double)
-        void Steps(double, double, double, int)
-        vector[double] GetMagTrain(vector[double] fa, vector[double] phi, double)
+        void Step(double, double)
+        void Steps(double, double, int)
+        vector[double] GetMagTrain(vector[double] fa, vector[double] phi )
 
-        int StepsToSS(double, double, double, double) ;
+        int StepsToSS(double, double, double) ;
 
-        bool   FindFlipAngleTrain(int, double* fa, double* Ftarget, double, double, int, double)
+        bool   FindFlipAngleTrain(int, double* fa, double* Ftarget, double, int, double)
 
         double FindFlipAngle(double, double, double, double, int, double)

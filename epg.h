@@ -29,7 +29,7 @@ class EPG {
  public:
 
        /** @brief Default Constructor */
-       EPG (const double &M0 = 1.0, const double &T1 = 1000.0, const double &T2 = 100.0) ;
+       EPG (const double &M0 = 1.0, const double &T1 = 1000.0, const double &T2 = 100.0, const double &TR = 10.0) ;
       ~EPG (        ) ;      /**< @brief destructor                 */
        EPG       (const EPG &epg); /**< @brief copy constructor           */
   void Copy      (const EPG &epg); /**< @brief copy without delete        */
@@ -39,7 +39,7 @@ class EPG {
 
  /* EPG state creation and initialization */
  /** @brief Reset EPG to equilibrium, possibly reassign new parameters */
- void SetParameters ( const double &M0, const double &T1, const double &T2 );	/**< @brief assign parameters (sets equilibrium)  */
+ void SetParameters ( const double &M0, const double &T1, const double &T2, const double &TR );	/**< @brief assign parameters (sets equilibrium)  */
  void DeleteStates  (  );	/**< @brief clear state vectors */
 
  /* get parameters of this epg */
@@ -47,6 +47,7 @@ class EPG {
  double  GetM0  () const { return m_M0;   };	/**< @brief Return equlibirium magnetization */
  double  GetT1  () const { return m_T1;   };	/**< @brief Return longitudinal relaxation   */
  double  GetT2  () const { return m_T2;   };	/**< @brief Return transverse relaxation     */
+ double  GetTR  () const { return m_TR;   };	/**< @brief Return repetition time     */
 
  /* other attributes of this epg */
  bool    GetVerbose(             ) const { return m_verbose; };
@@ -63,64 +64,70 @@ class EPG {
  void   GetFbState ( double* real, double* imag, const int &num = 0 ) const ; /**< @brief get complex transverse   state before next pulse */
  void   GetZbState ( double* real, double* imag, const int &num = 0 ) const ; /**< @brief get complex longitudinal state before next pulse */
 
- /** @brief returns transverse magnitude of state num after last RF pulse; longitudinal if transverse = false */
- double GetMagA  ( const int &num = 0 , const bool &transverse = true ) const;
- /** @brief returns transverse magnitude of state num before next RF pulse; longitudinal if transverse = false */
- double GetMagB  ( const int &num = 0 , const bool &transverse = true ) const;
+ /* @brief returns transverse magnitude of state num after last RF pulse*/
+ double GetMagFa  ( const int &num = 0  ) const;
+ /* @brief returns transverse magnitude of state num before next RF pulse*/
+ double GetMagFb  ( const int &num = 0  ) const;
+ /* @brief returns longitudinal magnitude of state num after last RF pulse*/
+ double GetMagZa  ( const int &num = 0  ) const;
+ /* @brief returns longitudinal magnitude of state num before next RF pulse*/
+ double GetMagZb  ( const int &num = 0  ) const;
 
  /** @brief returns real part of transverse magnetization for state num after last RF pulse */
- double GetReFA  ( const int &num = 0 ) const;
+ double GetReFa  ( const int &num = 0 ) const;
  /** @brief returns imag part of transverse magnetization for state num after last RF pulse */
- double GetImFA  ( const int &num = 0 ) const;
+ double GetImFa  ( const int &num = 0 ) const;
  /** @brief returns real part of transverse magnetization for state num before next RF pulse */
- double GetReFB  ( const int &num = 0 ) const;
+ double GetReFb  ( const int &num = 0 ) const;
  /** @brief returns imag part of transverse magnetization for state num before next RF pulse */
- double GetImFB  ( const int &num = 0 ) const;
+ double GetImFb  ( const int &num = 0 ) const;
  /** @brief returns real part of longitudinal magnetization for state num after last RF pulse */
- double GetReZA  ( const int &num = 0 ) const;
+ double GetReZa  ( const int &num = 0 ) const;
  /** @brief returns imag part of longitudinal magnetization for state num after last RF pulse */
- double GetImZA  ( const int &num = 0 ) const;
+ double GetImZa  ( const int &num = 0 ) const;
  /** @brief returns real part of longitudinal magnetization for state num before next RF pulse */
- double GetReZB  ( const int &num = 0 ) const;
+ double GetReZb  ( const int &num = 0 ) const;
  /** @brief returns imag part of longitudinal magnetization for state num before next RF pulse */
- double GetImZB  ( const int &num = 0 ) const;
+ double GetImZb  ( const int &num = 0 ) const;
 
- /** @brief returns transverse magnitude of next state, i.e. after the next RF pulse (fa,phi); longitudinal if transverse = false */
- double GetNextMagA       ( const double &fa, const double &phi,                   const int &num = 0, const bool &transverse = true  ) ;
+ /* @brief returns transverse magnitude of next state, i.e. after the next RF pulse (fa,phi) */
+ double GetNextMagFa ( const double &fa, const double &phi,const int &num = 0 ) ;
  
 
- /** @brief returns phase of last RF pulse */
+ /* @brief returns phase of last RF pulse */
  double GetPhase () {return m_phase;}
 
- /* stepping forward in EPG: RF pulse plus TR intervall */
- void Step     ( const double &fa, const double &phi, const double &TR ) ;			/**< @brief single step forward. input: RF pulse plus TR intervall */
- void Steps    ( const double &fa, const double &phi, const double &TR, const int &steps ) ;	/**< @brief multiple steps, constant flipangle and constant phase  */
- void Steps    ( const double* fa, const double &phi, const double &TR, const int &steps ) ;	/**< @brief multiple steps, variable flipangle and constant phase  */
- void Steps    ( const double* fa, const double* phi, const double &TR, const int &steps ) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
+ /* stepping forward in EPG: RF pulse and time evolution */
+ void Step  ( const double &fa, const double &phi ) ;			/**< @brief single step forward. input: RF pulse and time evolution */
+ void Steps ( const double &fa, const double &phi, const int &steps ) ;	/**< @brief multiple steps, constant flipangle and constant phase  */
+ void Steps ( const double* fa, const double &phi, const int &steps ) ;	/**< @brief multiple steps, variable flipangle and constant phase  */
+ void Steps ( const double* fa, const double* phi, const int &steps ) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
 
 // Overloading not working in Cython correctly, seems like compiler thinks Steps(double, double, double, int) and Steps(double*, double, double, int) have the same signature
 // This is a workaround. Additionally, this function allows to retrieve the transverse magnitude of state 0 after every RF pulse
-vector<double> GetMagTrain    ( const vector<double> &fa, const vector<double> &phi, const double &TR) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
+vector<double> GetMagTrain    ( const vector<double> &fa, const vector<double> &phi) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
 
  /** @brief stepping until steady state is reached. Qphi = quadratic phase incr. returns: number of steps needed */
- int StepsToSS ( const double &fa, const double &Qphi, const double &TR, const double &tol = EPG_TOL ) ;
+ int StepsToSS ( const double &fa, const double &Qphi, const double &tol = EPG_TOL ) ;
 
  /** @brief find train of flip angles to obtain a target signal shaping */
- bool FindFlipAngleTrain     (const int &length, double* fa, const double* Ftarget, const double &TR, const double &reduce=0.0, const int &num =0, const double &tol = EPG_TOL );
+ bool FindFlipAngleTrain     (const int &length, double* fa, const double* Ftarget, const double &reduce=0.0, const int &num =0, const double &tol = EPG_TOL );
  
 /** @brief find optimal flip angle using Brent's algorithm */
  double FindFlipAngle     ( const double &ax, const double &bx, const double &Ftarget, const double &phi,                   const int &num, const double &tol);
 
  protected:
  void   Rotation  ( const double &fa, const double &phi, const int &first =0, int last =-1) ; /**< @brief rotation of states  */
- void   Evolution ( const double &TR                                                      ) ; /**< @brief evolution of states */
  
   //private members
-  int      m_step;		/**< @brief current step */
-  bool     m_verbose;		/**< @brief Equlibirium magnetization */
-  double   m_M0;		/**< @brief Equlibirium magnetization */
-  double   m_T1;		/**< @brief Longitudinal relaxation   */
-  double   m_T2;		      /**< @brief Transverse relaxation     */
+  int      m_step;		    /**< @brief current step */
+  bool     m_verbose;		  /**< @brief verbose output */
+  double   m_M0;		      /**< @brief equilibrium magnetization */
+  double   m_T1;		      /**< @brief longitudinal relaxation time [ms]  */
+  double   m_T2;		      /**< @brief transverse relaxation time [ms]    */
+  double   m_TR;		      /**< @brief repetition time [ms]    */
+  double   m_E1;		      /**< @brief longitudinal exponential decay term */
+  double   m_E2;		      /**< @brief transverse exponential decay term */
   double   m_phase;		    /**< @brief phase of last RF pulse (might be needed for phase locking)  */
   vector<double>  m_FaRe;	/**< @brief Real part of transverse magnetization after the last pulse    */
   vector<double>  m_FaIm;	/**< @brief Imag part of transverse magnetization after the last pulse    */

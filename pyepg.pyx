@@ -68,10 +68,12 @@ cdef class PyEPG:
         Longitudinal relaxation time [ms]
     T2 : double
         Transverse relaxation time [ms]
+    TR : double
+        repetition time [ms]
 
     Methods
     -------
-    SetParameters(M0, T1, T2)
+    SetParameters(M0, T1, T2,TR)
         Sets simulation parameters
     DeleteStates()
         Clears all state vectors (Fa, Fb, Za, Zb)
@@ -89,10 +91,14 @@ cdef class PyEPG:
         Set all transverse state to zero (aKa spoiling)
     SetStep(val):
         Sets step counter of this EPG
-    GetMagA(int num=0, transverse=True):
-        Returns transverse/longitudinal magnitude of state num after last RF pulse
-    GetMagB(int num=0, transverse=True):
-        Returns transverse/longitudinal magnitude of state num before next RF pulse
+    GetMagFa(int num=0):
+        Returns transverse magnitude of state num after last RF pulse
+    GetMagFb(int num=0):
+        Returns transverse magnitude of state num before next RF pulse
+    GetMagZa(int num=0):
+        Returns longitudinal magnitude of state num after last RF pulse
+    GetMagZb(int num=0):
+        Returns longitudinal magnitude of state num before next RF pulse
     Step(fa, phi, TR):
         Single EPG step forward
     Steps(fa, phi, TR, steps):
@@ -107,7 +113,7 @@ cdef class PyEPG:
 
     cdef EPG* _thisptr
 
-    def __cinit__(self, other=1.0, T1=1000.0, T2=100.0):
+    def __cinit__(self, other=1.0, T1=1000.0, T2=100.0, TR=10.0):
         # Initialize the "this pointer" to NULL so __dealloc__
         # knows if there is something to deallocate. Do not
         # call new EPG() here.
@@ -117,7 +123,7 @@ cdef class PyEPG:
             ostr = <PyEPG> other
             self._thisptr = new EPG(deref(ostr._thisptr))
         else:
-            self._thisptr = new EPG(other, T1, T2)
+            self._thisptr = new EPG(other, T1, T2, TR)
 
     def __dealloc__(self):
         # Only call del if the C++ object is alive,
@@ -137,7 +143,7 @@ cdef class PyEPG:
 
 
  # EPG state creation and initialization
-    def SetParameters(PyEPG self, M0, T1, T2):
+    def SetParameters(PyEPG self, M0, T1, T2, TR):
         """
         Sets simulation parameters
 
@@ -150,10 +156,12 @@ cdef class PyEPG:
             Longitudinal relaxation time [ms]
         T2 : double
             Transverse relaxation time [ms]
+        TR : double
+            repetition time [ms]
         """
 
         self._check_alive()
-        self._thisptr.SetParameters(M0, T1, T2)
+        self._thisptr.SetParameters(M0, T1, T2, TR)
 
     def DeleteStates(PyEPG self):
         """
@@ -233,75 +241,59 @@ cdef class PyEPG:
         self._check_alive()
         self._thisptr.SetStep(val)
 
-    def GetMagA(PyEPG self, int num=0, transverse=True):
-        """
-        Returns transverse/longitudinal magnitude of state num after last RF pulse
-
-        Parameters
-        ----------
-        num : int
-            state order
-        transverse : bool
-            true -> transverse (default)
-            false -> longitudinal
-        """
-
+    def GetMagFa(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetMagA(num, transverse)
+        return self._thisptr.GetMagFa(num)
 
-    def GetMagB(PyEPG self, int num=0, transverse=True):
-        """
-        Returns transverse/longitudinal magnitude of state num before next RF pulse
-
-        Parameters
-        ----------
-        num : int
-            state order
-        transverse : bool
-            true -> transverse (default)
-            false -> longitudinal
-        """
-
+    def GetMagFb(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetMagB(num, transverse)
+        return self._thisptr.GetMagFb(num)
 
-    def GetReFA(PyEPG self, int num=0):
+    def GetMagZa(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetReFA(num)
+        return self._thisptr.GetMagZa(num)
 
-    def GetImFA(PyEPG self, int num=0):
+    def GetMagZb(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetImFA(num)
+        return self._thisptr.GetMagZb(num)
 
-    def GetReFB(PyEPG self, int num=0):
+    def GetReFa(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetReFB(num)
+        return self._thisptr.GetReFa(num)
 
-    def GetImFB(PyEPG self, int num=0):
+    def GetImFa(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetImFB(num)
+        return self._thisptr.GetImFa(num)
 
-    def GetReZA(PyEPG self, int num=0):
+    def GetReFb(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetReZA(num)
+        return self._thisptr.GetReFb(num)
 
-    def GetImZA(PyEPG self, int num=0):
+    def GetImFb(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetImZA(num)
+        return self._thisptr.GetImFb(num)
 
-    def GetReZB(PyEPG self, int num=0):
+    def GetReZa(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetReZB(num)
+        return self._thisptr.GetReZa(num)
 
-    def GetImZB(PyEPG self, int num=0):
+    def GetImZa(PyEPG self, int num=0):
         self._check_alive()
-        return self._thisptr.GetImZB(num)
+        return self._thisptr.GetImZa(num)
+
+    def GetReZb(PyEPG self, int num=0):
+        self._check_alive()
+        return self._thisptr.GetReZb(num)
+
+    def GetImZb(PyEPG self, int num=0):
+        self._check_alive()
+        return self._thisptr.GetImZb(num)
 
     def GetPhase(PyEPG self):
         self._check_alive()
         return self._thisptr.GetPhase()
 
-    def Step(PyEPG self, fa, phi, TR):
+    def Step(PyEPG self, fa, phi):
         """
         Single EPG step forward
 
@@ -311,19 +303,17 @@ cdef class PyEPG:
             RF flipangle [deg]
         phi : double
             RF phase
-        TR : double
-            pulse spacing [ms]
 
         Remarks
         -------
-        1 Step = RF-pulse + TR intervall
+        1 Step = RF-pulse + time evolution in TR
 
         """
 
         self._check_alive()
-        self._thisptr.Step(fa, phi, TR)
+        self._thisptr.Step(fa, phi)
 
-    def Steps(PyEPG self, fa, phi, TR, steps):
+    def Steps(PyEPG self, fa, phi, steps):
         """
         Multiple EPG steps forward, constant flipangle and phase
 
@@ -335,8 +325,6 @@ cdef class PyEPG:
             RF phase
         steps : int
             number of steps
-        TR : double
-            pulse spacing [ms]
 
         Remarks
         -------
@@ -345,9 +333,9 @@ cdef class PyEPG:
         """
 
         self._check_alive()
-        self._thisptr.Steps(fa, phi, TR, steps)
+        self._thisptr.Steps(fa, phi, steps)
 
-    def GetMagTrain(PyEPG self, fa, phi, TR):
+    def GetMagTrain(PyEPG self, fa, phi):
         """
         Multiple EPG steps forward, variable flipangle and phase
 
@@ -359,8 +347,6 @@ cdef class PyEPG:
             RF phase
         steps : int
             number of steps
-        TR : double
-            pulse spacing [ms]
 
         Returns
         -------
@@ -369,7 +355,7 @@ cdef class PyEPG:
 
         """
         self._check_alive()
-        cdef vector[double] array = self._thisptr.GetMagTrain(<vector[double]&> fa, <vector[double]&> phi, TR)
+        cdef vector[double] array = self._thisptr.GetMagTrain(<vector[double]&> fa, <vector[double]&> phi)
 
         w = ArrayWrapper()
         w.set_data(array) # "array" itself is invalid from here on
@@ -377,7 +363,7 @@ cdef class PyEPG:
 
         return ndarray
 
-    def StepsToSS(PyEPG self, fa, Qphi, TR, tol=EPG_TOL):
+    def StepsToSS(PyEPG self, fa, Qphi, tol=EPG_TOL):
         """
         Stepping until steady state is reached
 
@@ -388,8 +374,6 @@ cdef class PyEPG:
             RF flipangle [deg]
         Qphi : double
             Quadratic RF phase increment
-        TR : double
-            pulse spacing [ms]
         tol : double
            tolerance for termination
 
@@ -400,9 +384,9 @@ cdef class PyEPG:
 
         """
         self._check_alive()
-        return self._thisptr.StepsToSS(fa, Qphi, TR, tol)
+        return self._thisptr.StepsToSS(fa, Qphi, tol)
 
-    def FindFlipAngleTrain(PyEPG self, np.ndarray[double, ndim=1, mode="c"] Ftarget, TR, creduce=0.0, num=0, tol=EPG_TOL):
+    def FindFlipAngleTrain(PyEPG self, np.ndarray[double, ndim=1, mode="c"] Ftarget, creduce=0.0, num=0, tol=EPG_TOL):
         """
         Find flip angles for a given target signal shape
 
@@ -410,8 +394,6 @@ cdef class PyEPG:
         ----------
         Ftarget : 1d-array (double)
             Target signal shape
-        TR : double
-            pulse spacing [ms]
         creduce : double
             reduction factor for flip angle train scaling (0.0 < creduce < 1.0)
         num : int
@@ -428,7 +410,7 @@ cdef class PyEPG:
 
         cdef np.ndarray[double, ndim=1, mode="c"] np_buff = np.ascontiguousarray(fa, dtype=np.double)
 
-        self._thisptr.FindFlipAngleTrain(length, &np_buff[0], &Ftarget[0], TR, creduce, num, tol)
+        self._thisptr.FindFlipAngleTrain(length, &np_buff[0], &Ftarget[0], creduce, num, tol)
         return np_buff
 
     # The context manager protocol allows us to precisely

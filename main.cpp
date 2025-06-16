@@ -21,7 +21,7 @@ int main() {
     std::vector<double> vFlipArray(nPulses, dAlpha);
 
     // Create EPG object (M0, T1, T2)
-    EPG epg(dM0, dT1, dT2);
+    EPG epg(dM0, dT1, dT2, dTR);
 
     // Output tissue parameters
     printf("\n\nTissue parameters\n");
@@ -31,22 +31,22 @@ int main() {
     printf("Simple example\n");
     printf("==============\n");
     // Apply RF pulse (flipangle dAlpha, phase dPhi) and evolve one repetition time TR
-    epg.Step(dAlpha, dPhi, dTR);
+    epg.Step(dAlpha, dPhi);
     printf("Step (# applied RF pulses): %d\n", epg.GetStep());
-    printf("Mx: %.2f\n", epg.GetMagA());
-    printf("Mz: %.2f\n\n", epg.GetMagA(0, false));
+    printf("Mx: %.2f\n", epg.GetMagFa());
+    printf("Mz: %.2f\n\n", epg.GetMagZa());
 
     // Apply RF pulse again
-    epg.Step(dAlpha, dPhi, dTR);
+    epg.Step(dAlpha, dPhi);
     printf("Step (# applied RF pulses): %d\n", epg.GetStep());
-    printf("Mx: %.2f\n", epg.GetMagA());
-    printf("Mz: %.2f\n\n", epg.GetMagA(0, false));
+    printf("Mx: %.2f\n", epg.GetMagFa());
+    printf("Mz: %.2f\n\n", epg.GetMagZa());
 
     // Spoil transverse magnetization
     epg.NullTransverse();
     printf("Spoiling of transverse magnetization\n");
-    printf("Mx: %.2f\n", epg.GetMagA());
-    printf("Mz: %.2f\n\n", epg.GetMagA(0, false));
+    printf("Mx: %.2f\n", epg.GetMagFa());
+    printf("Mz: %.2f\n\n", epg.GetMagZa());
 
     // Back to equilibrium
     epg.Equilibrium();
@@ -54,7 +54,7 @@ int main() {
     // RF-spoiled GRE: Steps (number of RF pulses) needed to reach steady state using quadratic phase increment of 50deg
     printf("RF-spoiled GRE\n");
     printf("==============\n");
-    printf("Steps to steady state: %.d\n\n", epg.StepsToSS(dAlpha, 50.0, dTR));
+    printf("Steps to steady state: %.d\n\n", epg.StepsToSS(dAlpha, 50.0));
 
     printf("Non-spoiled GRE\n");
     printf("===============\n");
@@ -62,8 +62,8 @@ int main() {
     // Write signal evolution of flipangle train (here: still constant FA) in vector.
     epg.Equilibrium();
     for (int k=0;k<nPulses;k++) {
-        epg.Step(vFlipArray[k], 0.0, dTR);
-        vSignal[k] = epg.GetMagA(0);
+        epg.Step(vFlipArray[k], 0.0);
+        vSignal[k] = epg.GetMagFa();
         if(k%10 == 0)
         std::cout << "Signal after pulse " << (k+1) << ": " << vSignal[k] << std::endl;
     }
@@ -75,7 +75,7 @@ int main() {
     std::vector<double> vSignal2(nPulses, 1.0);
     std::vector<double> vFlipArray2(nPulses, 0.0);
     epg.Equilibrium();
-    epg.FindFlipAngleTrain(nPulses,&vFlipArray2[0], &vSignal2[0], dTR);
+    epg.FindFlipAngleTrain(nPulses,&vFlipArray2[0], &vSignal2[0]);
 
     //Save signal array to npy file
     cnpy::npy_save("/tmp/gre.npy",&vFlipArray2[0],{nPulses},"w");
