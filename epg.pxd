@@ -44,8 +44,9 @@ cdef extern from "epg.h":
 
         double GetPhase()
 
-        void Step(double, double)
-        void Steps(double, double, int)
+        void Step(double, double, bool)
+        void Steps(double, double, int, bool)
+
         vector[double] GetMagTrain(vector[double] fa, vector[double] phi )
 
         int StepsToSS(double, double, double) ;

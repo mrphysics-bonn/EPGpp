@@ -98,9 +98,18 @@ class EPG {
  double GetPhase () {return m_phase;}
 
  /* stepping forward in EPG: RF pulse and time evolution */
- void Step  ( const double &fa, const double &phi ) ;			/**< @brief single step forward. input: RF pulse and time evolution */
- void Steps ( const double &fa, const double &phi, const int &steps ) ;	/**< @brief multiple steps, constant flipangle and constant phase  */
- void Steps ( const double* fa, const double &phi, const int &steps ) ;	/**< @brief multiple steps, variable flipangle and constant phase  */
+ 
+ /** @brief single step forward. 
+  * input
+  * fa      : flip angle (in degree) of the RF pulse
+  * phi     : phase (in degree) of the RF pulse
+  * RFSpoil : boolean switch to turn of RF spoiling (default: false)
+  * if RFSpoil is true, then phi is treated as the quadratic phase increment
+*/
+ void Step  ( const double &fa, const double &phi, const bool &RFSpoil = false) ;			
+
+ void Steps ( const double &fa, const double &phi, const int &steps, const bool &RFSpoil = false ) ;	/**< @brief multiple steps, constant flipangle and constant phase  */
+ void Steps ( const double* fa, const double &phi, const int &steps, const bool &RFSpoil = false ) ;	/**< @brief multiple steps, variable flipangle and constant phase  */
  void Steps ( const double* fa, const double* phi, const int &steps ) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
 
 // Overloading not working in Cython correctly, seems like compiler thinks Steps(double, double, double, int) and Steps(double*, double, double, int) have the same signature

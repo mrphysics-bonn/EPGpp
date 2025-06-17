@@ -224,9 +224,15 @@ void EPG::Rotation ( const double &fa, const double &phi, const int &first, int 
 
 
 /****************************************************************/
-void EPG::Step ( const double &fa, const double &phi) {
+void EPG::Step ( const double &fa, const double &phi, const bool &RFSpoil) {
 
 	m_step++; //increase EPG step counter
+
+	if (RFSpoil) {
+		m_phase += m_step*phi;
+		m_phase = fmod(m_phase,360.0);
+	}
+	else { m_phase = phi; } // remember phase in case needed for phase locking
 
 	// extending state space, which shifts the Fb states: Fb[N] -> Fb[N+1]  (N = m_step-1)
 	for (int i=0; i<2; i++) {
@@ -241,7 +247,7 @@ void EPG::Step ( const double &fa, const double &phi) {
 	m_ZbRe.push_back(0.0);
 	m_ZbIm.push_back(0.0);
 	
-	Rotation(fa,phi);
+	Rotation(fa,m_phase);
 
 	// shifting and relaxation of states 
 	// note that the center state of  m_FbRe is shifted one up with respect to m_FaRe
@@ -256,16 +262,15 @@ void EPG::Step ( const double &fa, const double &phi) {
 	}
 	m_ZbRe[0] += m_M0*(1.0-m_E1); 	    // recovery of longitudinal ground state 
 
-	m_phase = phi; // remember phase in case needed for phase locking
 };
 
 /****************************************************************/
-void EPG::Steps ( const double &fa, const double &phi, const int &steps) {
-	for(int i=0;i<steps; ++i) { Step(fa,phi); }
+void EPG::Steps ( const double &fa, const double &phi, const int &steps, const bool &RFSpoil) {
+	for(int i=0;i<steps; ++i) { Step(fa,phi,RFSpoil); }
 };
 
-void EPG::Steps ( const double* fa, const double &phi, const int &steps) {
-	for(int i=0;i<steps; ++i) { Step(fa[i],phi); }
+void EPG::Steps ( const double* fa, const double &phi, const int &steps, const bool &RFSpoil) {
+	for(int i=0;i<steps; ++i) { Step(fa[i],phi,RFSpoil); }
 };
 
 void EPG::Steps ( const double* fa, const double* phi, const int &steps) {

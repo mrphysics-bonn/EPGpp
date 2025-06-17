@@ -99,7 +99,7 @@ cdef class PyEPG:
         Returns longitudinal magnitude of state num after last RF pulse
     GetMagZb(int num=0):
         Returns longitudinal magnitude of state num before next RF pulse
-    Step(fa, phi, TR):
+    Step(fa, phi, RFSpoil=true):
         Single EPG step forward
     Steps(fa, phi, TR, steps):
         Multiple EPG steps forward, constant flipangle and phase
@@ -293,7 +293,7 @@ cdef class PyEPG:
         self._check_alive()
         return self._thisptr.GetPhase()
 
-    def Step(PyEPG self, fa, phi):
+    def Step(PyEPG self, fa, phi, RFSpoil = False):
         """
         Single EPG step forward
 
@@ -303,7 +303,9 @@ cdef class PyEPG:
             RF flipangle [deg]
         phi : double
             RF phase
-
+        RFSpoil: bool 
+            RFSpoiling yes/no? default: False
+        
         Remarks
         -------
         1 Step = RF-pulse + time evolution in TR
@@ -311,9 +313,9 @@ cdef class PyEPG:
         """
 
         self._check_alive()
-        self._thisptr.Step(fa, phi)
+        self._thisptr.Step(fa, phi, RFSpoil)
 
-    def Steps(PyEPG self, fa, phi, steps):
+    def Steps(PyEPG self, fa, phi, steps, RFSpoil = False):
         """
         Multiple EPG steps forward, constant flipangle and phase
 
@@ -325,6 +327,8 @@ cdef class PyEPG:
             RF phase
         steps : int
             number of steps
+        RFSpoil: bool 
+            RFSpoiling yes/no? default: False
 
         Remarks
         -------
@@ -333,7 +337,7 @@ cdef class PyEPG:
         """
 
         self._check_alive()
-        self._thisptr.Steps(fa, phi, steps)
+        self._thisptr.Steps(fa, phi, steps, RFSpoil)
 
     def GetMagTrain(PyEPG self, fa, phi):
         """
