@@ -40,14 +40,14 @@ cdef extern from "epg.h":
         double GetReZb(int)
         double GetImZb(int)
 
-        double GetNextMagFA(double, double, int)
+        double GetNextMagFa(double, double, int)
 
         double GetPhase()
 
         void Step(double, double, bool)
         void Steps(double, double, int, bool)
 
-        vector[double] GetMagTrain(vector[double] fa, vector[double] phi )
+        vector[double] GetMagTrain(vector[double] fa, vector[double] ph )
 
         int StepsToSS(double, double, double) ;
 

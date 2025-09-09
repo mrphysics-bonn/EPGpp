@@ -28,10 +28,10 @@ void EPG::Copy (const EPG &epg){
 	
 	DeleteStates();
 	int i;
-	for (i=0; i<epg.m_FaRe.size(); ++i)  { m_FaRe.push_back(epg.m_FaRe[i]); m_FaIm.push_back(epg.m_FaIm[i]); }
-	for (i=0; i<epg.m_FbRe.size(); ++i)  { m_FbRe.push_back(epg.m_FbRe[i]); m_FbIm.push_back(epg.m_FbIm[i]); }
-	for (i=0; i<epg.m_ZaRe.size(); ++i)  { m_ZaRe.push_back(epg.m_ZaRe[i]); m_ZaIm.push_back(epg.m_ZaIm[i]); }
-	for (i=0; i<epg.m_ZbRe.size(); ++i)  { m_ZbRe.push_back(epg.m_ZbRe[i]); m_ZbIm.push_back(epg.m_ZbIm[i]); }
+	for (i=0; i<epg.m_FaRe.size(); ++i)  { m_FaRe.push_back(epg.m_FaRe.at(i)); m_FaIm.push_back(epg.m_FaIm.at(i)); }
+	for (i=0; i<epg.m_FbRe.size(); ++i)  { m_FbRe.push_back(epg.m_FbRe.at(i)); m_FbIm.push_back(epg.m_FbIm.at(i)); }
+	for (i=0; i<epg.m_ZaRe.size(); ++i)  { m_ZaRe.push_back(epg.m_ZaRe.at(i)); m_ZaIm.push_back(epg.m_ZaIm.at(i)); }
+	for (i=0; i<epg.m_ZbRe.size(); ++i)  { m_ZbRe.push_back(epg.m_ZbRe.at(i)); m_ZbIm.push_back(epg.m_ZbIm.at(i)); }
 
 };
 
@@ -110,7 +110,7 @@ void EPG::Equilibrium(){
 
 /****************************************************************/
 void EPG::NullTransverse(){
-	for (int i=0; i<m_FaRe.size(); ++i) { m_FaRe[i]=0.0; m_FaIm[i]=0.0;  m_FbRe[i]=0.0; m_FbIm[i]=0.0; }
+	for (int i=0; i<m_FaRe.size(); ++i) { m_FaRe.at(i)=0.0; m_FaIm.at(i)=0.0;  m_FbRe.at(i)=0.0; m_FbIm.at(i)=0.0; }
 };
 
 /****************************************************************/
@@ -125,114 +125,135 @@ void EPG::SetStep(int val) {
 	m_step=val; 
 	int i;
 
-	for ( i=2*m_step+1; i<SFa; ++i ) { m_FaRe[i]=0.0; m_FaIm[i]=0.0;}
-	for ( i=2*m_step+1; i<SFb; ++i ) { m_FbRe[i]=0.0; m_FbIm[i]=0.0;}
-	for ( i=  m_step  ; i<SZa; ++i ) { m_ZaRe[i]=0.0; m_ZaIm[i]=0.0;}
-	for ( i=  m_step  ; i<SZb; ++i ) { m_ZbRe[i]=0.0; m_ZbIm[i]=0.0;}
+	for ( i=2*m_step+1; i<SFa; ++i ) { m_FaRe.at(i)=0.0; m_FaIm.at(i)=0.0;}
+	for ( i=2*m_step+1; i<SFb; ++i ) { m_FbRe.at(i)=0.0; m_FbIm.at(i)=0.0;}
+	for ( i=  m_step  ; i<SZa; ++i ) { m_ZaRe.at(i)=0.0; m_ZaIm.at(i)=0.0;}
+	for ( i=  m_step  ; i<SZb; ++i ) { m_ZbRe.at(i)=0.0; m_ZbIm.at(i)=0.0;}
 };
 
 /****************************************************************/
 void   EPG::GetFaState ( double* real, double* imag, const int &num ) const {
 	int N = m_step-num-1;
-	if ( N >= 0 && N < 2*m_step+1 ) { *real = m_FaRe[N]; *imag = m_FaIm[N]; }
+	if ( N >= 0 && N < 2*m_step+1 ) { *real = m_FaRe.at(N); *imag = m_FaIm.at(N); }
 };
 
 void   EPG::GetFbState ( double* real, double* imag, const int &num ) const {
 	int N = m_step-num-1;
-	if ( N >= 0 && N < 2*m_step+1 ) { *real = m_FbRe[N]; *imag = m_FbIm[N]; }
+	if ( N >= 0 && N < 2*m_step+1 ) { *real = m_FbRe.at(N); *imag = m_FbIm.at(N); }
 };
 
 void  EPG::GetZaState ( double* real, double* imag, const int &num ) const {
-	if ( num >= 0 && num < m_step ) { *real = m_ZaRe[num]; *imag = m_ZaIm[num]; }
+	if ( num >= 0 && num < m_step ) { *real = m_ZaRe.at(num); *imag = m_ZaIm.at(num); }
 };
 
 void  EPG::GetZbState ( double* real, double* imag, const int &num ) const {
-	if ( num >= 0 && num < m_step ) { *real = m_ZbRe[num]; *imag = m_ZbIm[num]; }
+	if ( num >= 0 && num < m_step ) { *real = m_ZbRe.at(num); *imag = m_ZbIm.at(num); }
 };
 
 /* return real and imaginary state values */
-double EPG::GetReFa ( const int &num ) const { return m_FaRe[m_step-num-1]; }
-double EPG::GetImFa ( const int &num ) const { return m_FaIm[m_step-num-1]; }
-double EPG::GetReFb ( const int &num ) const { return m_FbRe[m_step-num];   } // the FB states shifted by 1, that means
-double EPG::GetImFb ( const int &num ) const { return m_FbIm[m_step-num];   } // Fa_0 = Fa[m_step-1] ; Fb_0 = Fb[m_step]
-double EPG::GetReZa ( const int &num ) const { return m_ZaRe[num]; }
-double EPG::GetImZa ( const int &num ) const { return m_ZaIm[num]; }
-double EPG::GetReZb ( const int &num ) const { return m_ZbRe[num]; }
-double EPG::GetImZb ( const int &num ) const { return m_ZbIm[num]; }
+double EPG::GetReFa ( const int &num ) const { return m_FaRe.at(m_step-num-1); }
+double EPG::GetImFa ( const int &num ) const { return m_FaIm.at(m_step-num-1); }
+double EPG::GetReFb ( const int &num ) const { return m_FbRe.at(m_step-num);   } // the FB states are shifted by 1, that means
+double EPG::GetImFb ( const int &num ) const { return m_FbIm.at(m_step-num);   } // Fa_0 = Fa[m_step-1] ; Fb_0 = Fb[m_step]
+double EPG::GetReZa ( const int &num ) const { return m_ZaRe.at(num); }
+double EPG::GetImZa ( const int &num ) const { return m_ZaIm.at(num); }
+double EPG::GetReZb ( const int &num ) const { return m_ZbRe.at(num); }
+double EPG::GetImZb ( const int &num ) const { return m_ZbIm.at(num); }
 
 /****************************************************************/
 /* return magnitude state values */
 double EPG::GetMagFa ( const int &num ) const {
 		int N = m_step-num-1;
-		if ( N >= 0 && N < 2*m_step+1 )	return sqrt (pow(m_FaRe[N],2) + pow(m_FaIm[N],2) ) ;
+		if ( N >= 0 && N < 2*m_step+1 )	return sqrt (pow(m_FaRe.at(N),2) + pow(m_FaIm.at(N),2) ) ;
 		else				return 0.0;
 }
 double EPG::GetMagZa ( const int &num ) const {
-		if ( num >= 0 && num < m_step )	return sqrt (pow(m_ZaRe[num],2) + pow(m_ZaIm[num],2) ) ;
+		if ( num >= 0 && num < m_step )	return sqrt (pow(m_ZaRe.at(num),2) + pow(m_ZaIm.at(num),2) ) ;
 		else				return 0.0;
 }
 double EPG::GetMagFb ( const int &num ) const {
 		int N = m_step-num;
-		if ( N >= 0 && N < 2*m_step+1 )	return sqrt (pow(m_FbRe[N],2) + pow(m_FbIm[N],2) ) ;
+		if ( N >= 0 && N < 2*m_step+1 )	return sqrt (pow(m_FbRe.at(N),2) + pow(m_FbIm.at(N),2) ) ;
 		else				return 0.0;
 }
 double EPG::GetMagZb ( const int &num ) const {
-		if ( num >= 0 && num < m_step )	return sqrt (pow(m_ZbRe[num],2) + pow(m_ZbIm[num],2) ) ;
+		if ( num >= 0 && num < m_step )	return sqrt (pow(m_ZbRe.at(num),2) + pow(m_ZbIm.at(num),2) ) ;
 		else				return 0.0;
 }
 
 
-double EPG::GetNextMagFa  ( const double &fa, const double &phi,const int &num  )  {
+double EPG::GetNextMagFa  ( const double &fa, const double &ph,const int &num  )  {
+//*	
+	for (int i=0; i<2; i++) {
+		m_FaRe.push_back(0.0);
+		m_FaIm.push_back(0.0);
+		m_FbRe.push_back(0.0);
+		m_FbIm.push_back(0.0);
+	}
+	m_ZaRe.push_back(0.0);
+	m_ZaIm.push_back(0.0);
+	m_ZbRe.push_back(0.0);
+	m_ZbIm.push_back(0.0);
+// */
 	m_step++;
-  	Rotation(fa,phi,num,num);  // rotate single configuration
+  	Rotation(fa,ph);  
 	double mag = GetMagFa (num);
-  	Rotation(-fa,phi,num,num); // rotate it back
+  	Rotation(-fa,ph); 
 	m_step--;
+//*	
+	for (int i=0; i<2; i++) {
+		m_FaRe.pop_back();
+		m_FaIm.pop_back();
+		m_FbRe.pop_back();
+		m_FbIm.pop_back();
+	}
+	m_ZaRe.pop_back();
+	m_ZaIm.pop_back();
+	m_ZbRe.pop_back();
+	m_ZbIm.pop_back();
+// */
 	return mag;
 };
 
 /****************************************************************/
-void EPG::Rotation ( const double &fa, const double &phi, const int &first, int last ) {
+void EPG::Rotation ( const double &fa, const double &ph) {
 
     int N = m_step-1;
-    last = (last<0?N:last);
-
-    if (first<0 || first>last || last>=m_step) { cout << "EPG::rotation error. States out of bounds.\n"; }
 
     double farad  =  fa*EPG_PI/180.0;
-    double phirad = phi*EPG_PI/180.0;
+    double phrad = ph*EPG_PI/180.0;
 
     /*	These equations follow from matrix product a = A* b with complex magnetization vectors a,b after
 	and before the pulse, respectively: b = [F(k) F*(-k) Z(k)]_{before},  a = [F(k) F*(-k) Z(k)]_{after}
 	A: transition matrix (see EPG literature, e.g. Scheffler, Concepts Magn Reson 1999;11:291–304).  
     */
-    for (int i=first;i<=last; ++i) {
-	double a,b,c,d,e,f,g,h,hb,gb,ec,fc;
-  
-	a = cos(farad/2); a *= a; /* set coefficients of transition matrix */
-	b = sin(farad/2); b *= b; c = sin(farad); d = cos(farad); e = sin(phirad);
-	f = cos(phirad); g = sin(2.0*phirad); h = cos(2.0*phirad); hb = h*b; gb = g*b; ec = e*c; fc = f*c;    
-      
-	m_FaRe[N+i] = a*m_FbRe[N+i]  + hb*m_FbRe[N-i] + gb*m_FbIm[N-i] + ec*m_ZbRe[i] + fc*m_ZbIm[i];
-	m_FaIm[N+i] = a*m_FbIm[N+i]  - hb*m_FbIm[N-i] + gb*m_FbRe[N-i] - fc*m_ZbRe[i] + ec*m_ZbIm[i];
-	m_FaRe[N-i] = hb*m_FbRe[N+i] + gb*m_FbIm[N+i] + a*m_FbRe[N-i]  + ec*m_ZbRe[i] - fc*m_ZbIm[i];
-	m_FaIm[N-i] = gb*m_FbRe[N+i] - hb*m_FbIm[N+i] + a*m_FbIm[N-i]  - fc*m_ZbRe[i] - ec*m_ZbIm[i];
-	m_ZaRe[i] = (-ec*m_FbRe[N+i] + fc*m_FbIm[N+i] - ec*m_FbRe[N-i] + fc*m_FbIm[N-i] + 2.0*d*m_ZbRe[i])/2.0;
-	m_ZaIm[i] = (-fc*m_FbRe[N+i] - ec*m_FbIm[N+i] + fc*m_FbRe[N-i] + ec*m_FbIm[N-i] + 2.0*d*m_ZbIm[i])/2.0;
+    for (int i=0;i<m_step; ++i) {
+		double a,b,c,d,e,f,g,h,hb,gb,ec,fc;
+	
+		a = cos(farad/2); a *= a; /* set coefficients of transition matrix */
+		b = sin(farad/2); b *= b; c = sin(farad); d = cos(farad); e = sin(phrad);
+		f = cos(phrad); g = sin(2.0*phrad); h = cos(2.0*phrad); hb = h*b; gb = g*b; ec = e*c; fc = f*c;    
+		
+		m_FaRe.at(N+i) = a*m_FbRe.at(N+i)  + hb*m_FbRe.at(N-i) + gb*m_FbIm.at(N-i) + ec*m_ZbRe.at(i) + fc*m_ZbIm.at(i);
+		m_FaIm.at(N+i) = a*m_FbIm.at(N+i)  - hb*m_FbIm.at(N-i) + gb*m_FbRe.at(N-i) - fc*m_ZbRe.at(i) + ec*m_ZbIm.at(i);
+		m_FaRe.at(N-i) = hb*m_FbRe.at(N+i) + gb*m_FbIm.at(N+i) + a*m_FbRe.at(N-i)  + ec*m_ZbRe.at(i) - fc*m_ZbIm.at(i);
+		m_FaIm.at(N-i) = gb*m_FbRe.at(N+i) - hb*m_FbIm.at(N+i) + a*m_FbIm.at(N-i)  - fc*m_ZbRe.at(i) - ec*m_ZbIm.at(i);
+		m_ZaRe.at(i) = (-ec*m_FbRe.at(N+i) + fc*m_FbIm.at(N+i) - ec*m_FbRe.at(N-i) + fc*m_FbIm.at(N-i) + 2.0*d*m_ZbRe.at(i))/2.0;
+		m_ZaIm.at(i) = (-fc*m_FbRe.at(N+i) - ec*m_FbIm.at(N+i) + fc*m_FbRe.at(N-i) + ec*m_FbIm.at(N-i) + 2.0*d*m_ZbIm.at(i))/2.0;
     }
 };
 
 
 /****************************************************************/
-void EPG::Step ( const double &fa, const double &phi, const bool &RFSpoil) {
+void EPG::Step ( const double &fa, const double &ph, const bool &RFSpoil) {
 
 	m_step++; //increase EPG step counter
 
 	if (RFSpoil) {
-		m_phase += m_step*phi;
+		m_phase += m_step*ph;
 		m_phase = fmod(m_phase,360.0);
 	}
-	else { m_phase = phi; } // remember phase in case needed for phase locking
+	else { m_phase = ph; } // remember phase in case needed for phase locking
 
 	// extending state space, which shifts the Fb states: Fb[N] -> Fb[N+1]  (N = m_step-1)
 	for (int i=0; i<2; i++) {
@@ -253,47 +274,47 @@ void EPG::Step ( const double &fa, const double &phi, const bool &RFSpoil) {
 	// note that the center state of  m_FbRe is shifted one up with respect to m_FaRe
 	int N = m_step-1;
 	for (int i=0;i<m_step;++i) {
-  		m_FbRe[N+i] = m_FaRe[N+i]*m_E2;	// evolution of dephasing transversal states (real part)
-  		m_FbIm[N+i] = m_FaIm[N+i]*m_E2;	// evolution of dephasing transversal states (imaginary part)
-  		m_FbRe[N-i] = m_FaRe[N-i]*m_E2;	// evolution of rephasing transversal states (real part)
-  		m_FbIm[N-i] = m_FaIm[N-i]*m_E2;	// evolution of rephasing transversal states (imaginary part)
-  		m_ZbRe[i] = m_ZaRe[i]*m_E1;	    // evolution of longitudinal states (real part)
-  		m_ZbIm[i] = m_ZaIm[i]*m_E1;	    // evolution of longitudinal states (imaginary part)
+  		m_FbRe.at(N+i) = m_FaRe.at(N+i)*m_E2;	// evolution of dephasing transversal states (real part)
+  		m_FbIm.at(N+i) = m_FaIm.at(N+i)*m_E2;	// evolution of dephasing transversal states (imaginary part)
+  		m_FbRe.at(N-i) = m_FaRe.at(N-i)*m_E2;	// evolution of rephasing transversal states (real part)
+  		m_FbIm.at(N-i) = m_FaIm.at(N-i)*m_E2;	// evolution of rephasing transversal states (imaginary part)
+  		m_ZbRe.at(i) = m_ZaRe.at(i)*m_E1;	    // evolution of longitudinal states (real part)
+  		m_ZbIm.at(i) = m_ZaIm.at(i)*m_E1;	    // evolution of longitudinal states (imaginary part)
 	}
 	m_ZbRe[0] += m_M0*(1.0-m_E1); 	    // recovery of longitudinal ground state 
 
 };
 
 /****************************************************************/
-void EPG::Steps ( const double &fa, const double &phi, const int &steps, const bool &RFSpoil) {
-	for(int i=0;i<steps; ++i) { Step(fa,phi,RFSpoil); }
+void EPG::Steps ( const double &fa, const double &ph, const int &steps, const bool &RFSpoil) {
+	for(int i=0;i<steps; ++i) { Step(fa,ph,RFSpoil); }
 };
 
-void EPG::Steps ( const double* fa, const double &phi, const int &steps, const bool &RFSpoil) {
-	for(int i=0;i<steps; ++i) { Step(fa[i],phi,RFSpoil); }
+void EPG::Steps ( const double* fa, const double &ph, const int &steps, const bool &RFSpoil) {
+	for(int i=0;i<steps; ++i) { Step(fa[i],ph,RFSpoil); }
 };
 
-void EPG::Steps ( const double* fa, const double* phi, const int &steps) {
-	for(int i=0;i<steps; ++i) { Step(fa[i],phi[i]); }
+void EPG::Steps ( const double* fa, const double* ph, const int &steps) {
+	for(int i=0;i<steps; ++i) { Step(fa[i],ph[i]); }
 };
 
-vector<double> EPG::GetMagTrain ( const std::vector<double> &fa, const std::vector<double> &phi) {
+vector<double> EPG::GetMagTrain ( const std::vector<double> &fa, const std::vector<double> &ph) {
 
     std::vector<double> sig(fa.size());
 
 	for(int i=0;i<fa.size(); ++i) {
-        Step(fa[i],phi[i]);
+        Step(fa[i],ph[i]);
         sig[i] = GetMagFa();
     }
         return sig;
 };
 
-int EPG::StepsToSS ( const double &fa, const double &Qphi, const double &tol ) {
-	double F,Fold=-1.0,phi=0.0;
+int EPG::StepsToSS ( const double &fa, const double &Qph, const double &tol ) {
+	double F,Fold=-1.0,ph=0.0;
 	for (int i=0;i<EPG_MAXSIZE;++i) {
-		phi += i*Qphi;
-		phi = fmod(phi,360.0);
-		Step(fa,phi);
+		ph += i*Qph;
+		ph = fmod(ph,360.0);
+		Step(fa,ph);
 		F = GetMagFa();
 		if (fabs((F-Fold)/m_M0)<tol) /*steady state reached*/ { return i; }
 		Fold = F;
@@ -343,7 +364,7 @@ bool EPG::FindFlipAngleTrain(const int &length, double* fa, const double* Ftarge
 };
 
 /****************************************************************/
-double EPG::FindFlipAngle(const double &ax, const double &bx, const double &Ftarget, const double &phi, const int &num, const double &tol) {
+double EPG::FindFlipAngle(const double &ax, const double &bx, const double &Ftarget, const double &ph, const int &num, const double &tol) {
 
   double a,b,c;				/* Abscissae, descr. see above	*/
   double fa;				/* f(a)				*/
@@ -351,8 +372,8 @@ double EPG::FindFlipAngle(const double &ax, const double &bx, const double &Ftar
   double fc;				/* f(c)				*/
 
   a = ax;  b = bx;
-  fa = Ftarget - GetNextMagFa (a,phi,num);
-  fb = Ftarget - GetNextMagFa (b,phi,num);
+  fa = Ftarget - GetNextMagFa (a,ph,num);
+  fb = Ftarget - GetNextMagFa (b,ph,num);
   
   c = a;   fc = fa;
 
@@ -419,7 +440,7 @@ double EPG::FindFlipAngle(const double &ax, const double &bx, const double &Ftar
 
     a = b;  fa = fb;			/* Save the previous approx.	*/
     b += new_step;			/* Do step to a new approxim.	*/  
-    fb = Ftarget - GetNextMagFa (b,phi,num);
+    fb = Ftarget - GetNextMagFa (b,ph,num);
     
     if( (fb > 0 && fc > 0) || (fb < 0 && fc < 0) )
     {                 			/* Adjust c for it to have a sign*/

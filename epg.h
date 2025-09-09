@@ -90,8 +90,8 @@ class EPG {
  /** @brief returns imag part of longitudinal magnetization for state num before next RF pulse */
  double GetImZb  ( const int &num = 0 ) const;
 
- /* @brief returns transverse magnitude of next state, i.e. after the next RF pulse (fa,phi) */
- double GetNextMagFa ( const double &fa, const double &phi,const int &num = 0 ) ;
+ /* @brief returns transverse magnitude of next state, i.e. after the next RF pulse (fa,ph) */
+ double GetNextMagFa ( const double &fa, const double &ph,const int &num = 0 ) ;
  
 
  /* @brief returns phase of last RF pulse */
@@ -102,31 +102,31 @@ class EPG {
  /** @brief single step forward. 
   * input
   * fa      : flip angle (in degree) of the RF pulse
-  * phi     : phase (in degree) of the RF pulse
+  * ph     : phase (in degree) of the RF pulse
   * RFSpoil : boolean switch to turn of RF spoiling (default: false)
-  * if RFSpoil is true, then phi is treated as the quadratic phase increment
+  * if RFSpoil is true, then ph is treated as the quadratic phase increment
 */
- void Step  ( const double &fa, const double &phi, const bool &RFSpoil = false) ;			
+ void Step  ( const double &fa, const double &ph, const bool &RFSpoil = false) ;			
 
- void Steps ( const double &fa, const double &phi, const int &steps, const bool &RFSpoil = false ) ;	/**< @brief multiple steps, constant flipangle and constant phase  */
- void Steps ( const double* fa, const double &phi, const int &steps, const bool &RFSpoil = false ) ;	/**< @brief multiple steps, variable flipangle and constant phase  */
- void Steps ( const double* fa, const double* phi, const int &steps ) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
+ void Steps ( const double &fa, const double &ph, const int &steps, const bool &RFSpoil = false ) ;	/**< @brief multiple steps, constant flipangle and constant phase  */
+ void Steps ( const double* fa, const double &ph, const int &steps, const bool &RFSpoil = false ) ;	/**< @brief multiple steps, variable flipangle and constant phase  */
+ void Steps ( const double* fa, const double* ph, const int &steps ) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
 
 // Overloading not working in Cython correctly, seems like compiler thinks Steps(double, double, double, int) and Steps(double*, double, double, int) have the same signature
 // This is a workaround. Additionally, this function allows to retrieve the transverse magnitude of state 0 after every RF pulse
-vector<double> GetMagTrain    ( const vector<double> &fa, const vector<double> &phi) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
+vector<double> GetMagTrain    ( const vector<double> &fa, const vector<double> &ph) ;	/**< @brief multiple steps, variable flipangle and variable phase  */
 
- /** @brief stepping until steady state is reached. Qphi = quadratic phase incr. returns: number of steps needed */
- int StepsToSS ( const double &fa, const double &Qphi, const double &tol = EPG_TOL ) ;
+ /** @brief stepping until steady state is reached. Qph = quadratic phase incr. returns: number of steps needed */
+ int StepsToSS ( const double &fa, const double &Qph, const double &tol = EPG_TOL ) ;
 
  /** @brief find train of flip angles to obtain a target signal shaping */
  bool FindFlipAngleTrain     (const int &length, double* fa, const double* Ftarget, const double &reduce=0.0, const int &num =0, const double &tol = EPG_TOL );
  
 /** @brief find optimal flip angle using Brent's algorithm */
- double FindFlipAngle     ( const double &ax, const double &bx, const double &Ftarget, const double &phi,                   const int &num, const double &tol);
+ double FindFlipAngle     ( const double &ax, const double &bx, const double &Ftarget, const double &ph,                   const int &num, const double &tol);
 
  protected:
- void   Rotation  ( const double &fa, const double &phi, const int &first =0, int last =-1) ; /**< @brief rotation of states  */
+ void   Rotation  ( const double &fa, const double &ph) ; /**< @brief rotation of states  */
  
   //private members
   int      m_step;		    /**< @brief current step */

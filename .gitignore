@@ -9,4 +9,5 @@ build
 .ipynb_checkpoints
 pyepg.cpp
 .mypy_cache
+PyEPG.egg-info
 

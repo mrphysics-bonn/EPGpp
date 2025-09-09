@@ -99,13 +99,13 @@ cdef class PyEPG:
         Returns longitudinal magnitude of state num after last RF pulse
     GetMagZb(int num=0):
         Returns longitudinal magnitude of state num before next RF pulse
-    Step(fa, phi, RFSpoil=true):
+    Step(fa, ph, RFSpoil=true):
         Single EPG step forward
-    Steps(fa, phi, TR, steps):
+    Steps(fa, ph, TR, steps):
         Multiple EPG steps forward, constant flipangle and phase
-    GetMagTrain(fa, phi, TR):
+    GetMagTrain(fa, ph, TR):
         Multiple EPG steps forward, variable flipangle and phase
-    StepsToSS(fa, Qphi, TR, tol=EPG_TOL):
+    StepsToSS(fa, Qph, TR, tol=EPG_TOL):
         Stepping until steady state is reached
     FindFlipAngleTrain(np.ndarray[double, ndim=1, mode="c"] Ftarget, TR, creduce=0.0, num=0, tol=EPG_TOL):
         Find fli pangles for a given target signal shape
@@ -203,6 +203,14 @@ cdef class PyEPG:
         self._check_alive()
         return self._thisptr.GetT2()
 
+    def GetTR(PyEPG self):
+        """
+        Return transverse relaxation
+        """
+
+        self._check_alive()
+        return self._thisptr.GetTR()
+
     def GetVerbose(PyEPG self):
         self._check_alive()
         return self._thisptr.GetVerbose()
@@ -293,7 +301,24 @@ cdef class PyEPG:
         self._check_alive()
         return self._thisptr.GetPhase()
 
-    def Step(PyEPG self, fa, phi, RFSpoil = False):
+    def GetNextMagFa(PyEPG self, fa, ph, int num = 0):
+        """
+        Get Magnitude of next Fa state (without changing current state)
+
+        Parameters
+        ----------
+        fa : double
+            RF flipangle [deg]
+        ph : double
+            RF phase
+        num : int
+           EPG state order (default zero)
+        
+        """
+        self._check_alive()
+        return self._thisptr.GetNextMagFa(fa, ph, num)
+
+    def Step(PyEPG self, fa, ph, RFSpoil = False):
         """
         Single EPG step forward
 
@@ -301,7 +326,7 @@ cdef class PyEPG:
         ----------
         fa : double
             RF flipangle [deg]
-        phi : double
+        ph : double
             RF phase
         RFSpoil: bool 
             RFSpoiling yes/no? default: False
@@ -313,9 +338,9 @@ cdef class PyEPG:
         """
 
         self._check_alive()
-        self._thisptr.Step(fa, phi, RFSpoil)
+        self._thisptr.Step(fa, ph, RFSpoil)
 
-    def Steps(PyEPG self, fa, phi, steps, RFSpoil = False):
+    def Steps(PyEPG self, fa, ph, steps, RFSpoil = False):
         """
         Multiple EPG steps forward, constant flipangle and phase
 
@@ -323,7 +348,7 @@ cdef class PyEPG:
         ----------
         fa : double
             RF flipangle [deg]
-        phi : double
+        ph : double
             RF phase
         steps : int
             number of steps
@@ -337,9 +362,9 @@ cdef class PyEPG:
         """
 
         self._check_alive()
-        self._thisptr.Steps(fa, phi, steps, RFSpoil)
+        self._thisptr.Steps(fa, ph, steps, RFSpoil)
 
-    def GetMagTrain(PyEPG self, fa, phi):
+    def GetMagTrain(PyEPG self, fa, ph):
         """
         Multiple EPG steps forward, variable flipangle and phase
 
@@ -347,7 +372,7 @@ cdef class PyEPG:
         ----------
         fa : 1d-array (double)
             RF flipangle [deg]
-        phi : 1d-array (double)
+        ph : 1d-array (double)
             RF phase
         steps : int
             number of steps
@@ -359,7 +384,7 @@ cdef class PyEPG:
 
         """
         self._check_alive()
-        cdef vector[double] array = self._thisptr.GetMagTrain(<vector[double]&> fa, <vector[double]&> phi)
+        cdef vector[double] array = self._thisptr.GetMagTrain(<vector[double]&> fa, <vector[double]&> ph)
 
         w = ArrayWrapper()
         w.set_data(array) # "array" itself is invalid from here on
@@ -367,7 +392,7 @@ cdef class PyEPG:
 
         return ndarray
 
-    def StepsToSS(PyEPG self, fa, Qphi, tol=EPG_TOL):
+    def StepsToSS(PyEPG self, fa, Qph, tol=EPG_TOL):
         """
         Stepping until steady state is reached
 
@@ -376,7 +401,7 @@ cdef class PyEPG:
         ----------
         fa : double
             RF flipangle [deg]
-        Qphi : double
+        Qph : double
             Quadratic RF phase increment
         tol : double
            tolerance for termination
@@ -388,7 +413,7 @@ cdef class PyEPG:
 
         """
         self._check_alive()
-        return self._thisptr.StepsToSS(fa, Qphi, tol)
+        return self._thisptr.StepsToSS(fa, Qph, tol)
 
     def FindFlipAngleTrain(PyEPG self, np.ndarray[double, ndim=1, mode="c"] Ftarget, creduce=0.0, num=0, tol=EPG_TOL):
         """
@@ -432,7 +457,7 @@ cdef class PyEPG:
             self._thisptr = NULL # inform __dealloc__
         return False # propagate exceptions
 
-    def FindFlipAngle(PyEPG self,  FAmin, FAmax, FMagTarget, phi=0, num=0, tol=EPG_TOL): 
+    def FindFlipAngle(PyEPG self,  FAmin, FAmax, FMagTarget, ph=0, num=0, tol=EPG_TOL): 
         """
         Find flip angle within bounds to match a target magnitude signal in the next step
 
@@ -444,10 +469,10 @@ cdef class PyEPG:
             upper bound = maximum RF flipangle [deg]
         FMagTarget : double
             target magnitude signal
-        phi : double
+        ph : double
            RF pulse phase
         num : int
-           EPG state order (defaults to zero)
+           EPG state order (default zero)
         tol : double
            tolerance for termination
 
@@ -458,4 +483,4 @@ cdef class PyEPG:
 
         """
         self._check_alive()
-        return self._thisptr.FindFlipAngle(FAmin, FAmax, FMagTarget, phi, num, tol)
+        return self._thisptr.FindFlipAngle(FAmin, FAmax, FMagTarget, ph, num, tol)
