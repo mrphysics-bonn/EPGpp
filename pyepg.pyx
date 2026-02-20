@@ -163,6 +163,14 @@ cdef class PyEPG:
         self._check_alive()
         self._thisptr.SetParameters(M0, T1, T2, TR)
 
+
+    def PhaseShift(PyEPG self, CP):
+        """
+        adds coherent phase evolution for next TR
+        """
+        self._check_alive()
+        self._thisptr.PhaseShift(CP)
+
     def DeleteStates(PyEPG self):
         """
         Clears all state vectors (Fa, Fb, Za, Zb), leaving the vectors with a size of 0.
@@ -211,6 +219,7 @@ cdef class PyEPG:
         self._check_alive()
         return self._thisptr.GetTR()
 
+
     def GetVerbose(PyEPG self):
         self._check_alive()
         return self._thisptr.GetVerbose()
@@ -227,13 +236,13 @@ cdef class PyEPG:
         self._check_alive()
         self._thisptr.Equilibrium()
 
-    def NullTransverse(PyEPG self):
+    def LongDelay(PyEPG self, TD):
         """
-        Set all transverse state to zero (aKa spoiling)
+        insert long delay which sets all transverse state to zero (aKa perfect spoiling)
         """
 
         self._check_alive()
-        self._thisptr.NullTransverse()
+        self._thisptr.LongDelay(TD)
 
     def SetStep(PyEPG self, val):
         """

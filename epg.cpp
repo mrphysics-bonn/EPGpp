@@ -11,6 +11,9 @@
 EPG::EPG (const double &M0 , const double &T1 , const double &T2, const double &TR ) {
 	SetParameters(M0,T1,T2,TR); 
 	m_verbose = false;
+	// default: no coherent phase evolution
+	m_shift_phase = false; 
+	m_phase_shift = 0.0; 
 };
 
 /****************************************************************/
@@ -78,6 +81,9 @@ void EPG::SetParameters (const double &M0, const double &T1, const double &T2, c
 	m_TR = TR;
 	m_E1 = exp(-TR/m_T1);
 	m_E2 = exp(-TR/m_T2);
+	// default: no coherent phase evolution
+	m_shift_phase = false; 
+	m_phase_shift = 0.0; 
 	Equilibrium();
 };
 
@@ -109,12 +115,18 @@ void EPG::Equilibrium(){
 };
 
 /****************************************************************/
-void EPG::NullTransverse(){
+void EPG::LongDelay (const double& TD){
 	for (int i=0; i<m_FaRe.size(); ++i) { m_FaRe.at(i)=0.0; m_FaIm.at(i)=0.0;  m_FbRe.at(i)=0.0; m_FbIm.at(i)=0.0; }
+	for (int i=0;i<m_ZaRe.size();++i) {
+		m_ZbRe[i] = m_ZbRe[i]*exp(-TD/m_T1);	//decay of longitudinal states (real part)
+		m_ZbIm[i] = m_ZbIm[i]*exp(-TD/m_T1);	//evolution of longitudinal states (imaginary part)
+	}
+	m_ZbRe[0] += m_M0*(1.0-exp(-TD/m_T1)); 	// recovery of longitudinal ground state 
+
 };
 
 /****************************************************************/
-void EPG::SetStep(int val) {
+void EPG::SetStep(const int& val) {
 //
 	int SFa = m_FaRe.size();
 	int SFb = m_FbRe.size();
@@ -138,7 +150,7 @@ void   EPG::GetFaState ( double* real, double* imag, const int &num ) const {
 };
 
 void   EPG::GetFbState ( double* real, double* imag, const int &num ) const {
-	int N = m_step-num-1;
+	int N = m_step-num;
 	if ( N >= 0 && N < 2*m_step+1 ) { *real = m_FbRe.at(N); *imag = m_FbIm.at(N); }
 };
 
@@ -234,13 +246,19 @@ void EPG::Rotation ( const double &fa, const double &ph) {
 		b = sin(farad/2); b *= b; c = sin(farad); d = cos(farad); e = sin(phrad);
 		f = cos(phrad); g = sin(2.0*phrad); h = cos(2.0*phrad); hb = h*b; gb = g*b; ec = e*c; fc = f*c;    
 		
-		m_FaRe.at(N+i) = a*m_FbRe.at(N+i)  + hb*m_FbRe.at(N-i) + gb*m_FbIm.at(N-i) + ec*m_ZbRe.at(i) + fc*m_ZbIm.at(i);
-		m_FaIm.at(N+i) = a*m_FbIm.at(N+i)  - hb*m_FbIm.at(N-i) + gb*m_FbRe.at(N-i) - fc*m_ZbRe.at(i) + ec*m_ZbIm.at(i);
-		m_FaRe.at(N-i) = hb*m_FbRe.at(N+i) + gb*m_FbIm.at(N+i) + a*m_FbRe.at(N-i)  + ec*m_ZbRe.at(i) - fc*m_ZbIm.at(i);
-		m_FaIm.at(N-i) = gb*m_FbRe.at(N+i) - hb*m_FbIm.at(N+i) + a*m_FbIm.at(N-i)  - fc*m_ZbRe.at(i) - ec*m_ZbIm.at(i);
-		m_ZaRe.at(i) = (-ec*m_FbRe.at(N+i) + fc*m_FbIm.at(N+i) - ec*m_FbRe.at(N-i) + fc*m_FbIm.at(N-i) + 2.0*d*m_ZbRe.at(i))/2.0;
-		m_ZaIm.at(i) = (-fc*m_FbRe.at(N+i) - ec*m_FbIm.at(N+i) + fc*m_FbRe.at(N-i) + ec*m_FbIm.at(N-i) + 2.0*d*m_ZbIm.at(i))/2.0;
+		m_FaRe.at(N-i) = a*m_FbRe.at(N-i)  + hb*m_FbRe.at(N+i) + gb*m_FbIm.at(N+i) + ec*m_ZbRe.at(i) + fc*m_ZbIm.at(i);
+		m_FaIm.at(N-i) = a*m_FbIm.at(N-i)  - hb*m_FbIm.at(N+i) + gb*m_FbRe.at(N+i) - fc*m_ZbRe.at(i) + ec*m_ZbIm.at(i);
+		m_FaRe.at(N+i) = hb*m_FbRe.at(N-i) + gb*m_FbIm.at(N-i) + a*m_FbRe.at(N+i)  + ec*m_ZbRe.at(i) - fc*m_ZbIm.at(i);
+		m_FaIm.at(N+i) = gb*m_FbRe.at(N-i) - hb*m_FbIm.at(N-i) + a*m_FbIm.at(N+i)  - fc*m_ZbRe.at(i) - ec*m_ZbIm.at(i);
+		m_ZaRe.at(i) = (-ec*m_FbRe.at(N-i) + fc*m_FbIm.at(N-i) - ec*m_FbRe.at(N+i) + fc*m_FbIm.at(N+i) + 2.0*d*m_ZbRe.at(i))/2.0;
+		m_ZaIm.at(i) = (-fc*m_FbRe.at(N-i) - ec*m_FbIm.at(N-i) + fc*m_FbRe.at(N+i) + ec*m_FbIm.at(N+i) + 2.0*d*m_ZbIm.at(i))/2.0;
     }
+};
+
+/****************************************************************/
+void EPG::PhaseShift ( const double &phase_shift ) {
+	m_shift_phase = (phase_shift != 0.0); 
+	m_phase_shift = phase_shift*EPG_PI/180.0; // expect phase shift in degree
 };
 
 
@@ -270,19 +288,38 @@ void EPG::Step ( const double &fa, const double &ph, const bool &RFSpoil) {
 	
 	Rotation(fa,m_phase);
 
-	// shifting and relaxation of states 
+	// Time evolution: shifting and relaxation of states 
 	// note that the center state of  m_FbRe is shifted one up with respect to m_FaRe
 	int N = m_step-1;
-	for (int i=0;i<m_step;++i) {
-  		m_FbRe.at(N+i) = m_FaRe.at(N+i)*m_E2;	// evolution of dephasing transversal states (real part)
-  		m_FbIm.at(N+i) = m_FaIm.at(N+i)*m_E2;	// evolution of dephasing transversal states (imaginary part)
-  		m_FbRe.at(N-i) = m_FaRe.at(N-i)*m_E2;	// evolution of rephasing transversal states (real part)
-  		m_FbIm.at(N-i) = m_FaIm.at(N-i)*m_E2;	// evolution of rephasing transversal states (imaginary part)
-  		m_ZbRe.at(i) = m_ZaRe.at(i)*m_E1;	    // evolution of longitudinal states (real part)
-  		m_ZbIm.at(i) = m_ZaIm.at(i)*m_E1;	    // evolution of longitudinal states (imaginary part)
-	}
-	m_ZbRe[0] += m_M0*(1.0-m_E1); 	    // recovery of longitudinal ground state 
 
+	// longitudinal states
+	for (int i=0;i<m_step;++i) {
+		m_ZbRe[i] = m_ZaRe[i]*m_E1;	//evolution of longitudinal states (real part)
+		m_ZbIm[i] = m_ZaIm[i]*m_E1;	//evolution of longitudinal states (imaginary part)
+	}
+	m_ZbRe[0] += m_M0*(1.0-m_E1); 	// recovery of longitudinal ground state 
+
+	// transverse states
+	if (m_shift_phase) { // EPG transverse states with coherent phase evolution (motion, flow)
+		double c = cos(m_phase_shift);
+		double s = sin(m_phase_shift);
+		for (int i=0;i<m_step;++i) {
+			m_FbRe[N+i] = (c*m_FaRe[N+i]-s*m_FaIm[N+i])*m_E2;	//evolution of dephasing transversal states (real part)
+			m_FbIm[N+i] = (s*m_FaRe[N+i]+c*m_FaIm[N+i])*m_E2;	//evolution of dephasing transversal states (imaginary part)
+			m_FbRe[N-i] = (c*m_FaRe[N-i]-s*m_FaIm[N-i])*m_E2;	//evolution of rephasing transversal states (real part)
+			m_FbIm[N-i] = (s*m_FaRe[N-i]+c*m_FaIm[N-i])*m_E2;	//evolution of rephasing transversal states (imaginary part)
+		}
+		m_shift_phase = false;
+		m_phase_shift = 0.0;
+	}
+	else { //standard EPG evolution of transverse states  
+		for (int i=0;i<m_step;++i) {
+			m_FbRe.at(N+i) = m_FaRe.at(N+i)*m_E2;	// evolution of dephasing transversal states (real part)
+			m_FbIm.at(N+i) = m_FaIm.at(N+i)*m_E2;	// evolution of dephasing transversal states (imaginary part)
+			m_FbRe.at(N-i) = m_FaRe.at(N-i)*m_E2;	// evolution of rephasing transversal states (real part)
+			m_FbIm.at(N-i) = m_FaIm.at(N-i)*m_E2;	// evolution of rephasing transversal states (imaginary part)
+		}
+	}
 };
 
 /****************************************************************/

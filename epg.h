@@ -48,15 +48,15 @@ class EPG {
  double  GetT1  () const { return m_T1;   };	/**< @brief Return longitudinal relaxation   */
  double  GetT2  () const { return m_T2;   };	/**< @brief Return transverse relaxation     */
  double  GetTR  () const { return m_TR;   };	/**< @brief Return repetition time     */
-
+ 
  /* other attributes of this epg */
  bool    GetVerbose(             ) const { return m_verbose; };
  void    SetVerbose(bool val=true)       { m_verbose=val;    };
 
  /* State manipulation */
- void Equilibrium    (       ); /**< @brief Reset EPG to equilibrium          */
- void NullTransverse (       ); /**< @brief Set all transverse states to zero */
- void SetStep        (int val); /**< @brief Set step counter of this EPG      */
+ void Equilibrium (                ); /**< @brief Reset EPG to equilibrium               */
+ void LongDelay   (const double& TD); /**< @brief add long delay, assuming that transverse states decay to zero */
+ void SetStep     (const int& val  ); /**< @brief Set step counter of this EPG           */
 
  /* get state components of order num */
  void   GetFaState ( double* real, double* imag, const int &num = 0 ) const ; /**< @brief get complex transverse   state after last pulse  */
@@ -97,6 +97,9 @@ class EPG {
  /* @brief returns phase of last RF pulse */
  double GetPhase () {return m_phase;}
 
+ /**< @brief coherent phase shift for next TR (unit: degree)  */
+ void PhaseShift ( const double &phase_shift );	
+
  /* stepping forward in EPG: RF pulse and time evolution */
  
  /** @brief single step forward. 
@@ -129,15 +132,17 @@ vector<double> GetMagTrain    ( const vector<double> &fa, const vector<double> &
  void   Rotation  ( const double &fa, const double &ph) ; /**< @brief rotation of states  */
  
   //private members
-  int      m_step;		    /**< @brief current step */
-  bool     m_verbose;		  /**< @brief verbose output */
-  double   m_M0;		      /**< @brief equilibrium magnetization */
-  double   m_T1;		      /**< @brief longitudinal relaxation time [ms]  */
-  double   m_T2;		      /**< @brief transverse relaxation time [ms]    */
-  double   m_TR;		      /**< @brief repetition time [ms]    */
-  double   m_E1;		      /**< @brief longitudinal exponential decay term */
-  double   m_E2;		      /**< @brief transverse exponential decay term */
-  double   m_phase;		    /**< @brief phase of last RF pulse (might be needed for phase locking)  */
+  int      m_step;		        /**< @brief current step */
+  bool     m_verbose;		      /**< @brief verbose output */
+  double   m_M0;		          /**< @brief equilibrium magnetization */
+  double   m_T1;		          /**< @brief longitudinal relaxation time [ms]  */
+  double   m_T2;		          /**< @brief transverse relaxation time [ms]    */
+  double   m_TR;		          /**< @brief repetition time [ms]    */
+  double   m_E1;		          /**< @brief longitudinal exponential decay term */
+  double   m_E2;		          /**< @brief transverse exponential decay term */
+  bool     m_shift_phase;     /**< @brief consider coherent phase shift for next TR  */
+  double   m_phase_shift;     /**< @brief coherent phase shift added in next TR  */
+  double   m_phase;		        /**< @brief phase of last RF pulse (might be needed for phase locking)  */
   vector<double>  m_FaRe;	/**< @brief Real part of transverse magnetization after the last pulse    */
   vector<double>  m_FaIm;	/**< @brief Imag part of transverse magnetization after the last pulse    */
   vector<double>  m_FbRe;	/**< @brief Real part of transverse magnetization before the next pulse   */

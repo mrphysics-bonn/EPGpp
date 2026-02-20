@@ -11,6 +11,7 @@ cdef extern from "epg.h":
         EPG(EPG&) except +
         operator=(EPG) except +
         void SetParameters(double, double, double, double)
+        void PhaseShift ( double )
         void DeleteStates()
 
         int  GetStep()
@@ -22,7 +23,7 @@ cdef extern from "epg.h":
         bool GetVerbose()
         void SetVerbose(bool)
         void Equilibrium()
-        void NullTransverse()
+        void LongDelay(double)
         void SetStep(int)
 
         double GetMagFa(int)

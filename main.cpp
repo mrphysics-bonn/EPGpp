@@ -43,7 +43,7 @@ int main() {
     printf("Mz: %.2f\n\n", epg.GetMagZa());
 
     // Spoil transverse magnetization
-    epg.NullTransverse();
+    epg.LongDelay(0.0);
     printf("Spoiling of transverse magnetization\n");
     printf("Mx: %.2f\n", epg.GetMagFa());
     printf("Mz: %.2f\n\n", epg.GetMagZa());
@@ -63,7 +63,7 @@ int main() {
     epg.Equilibrium();
     for (int k=0;k<nPulses;k++) {
         epg.Step(vFlipArray[k], 0.0);
-        vSignal[k] = epg.GetMagFa();
+        vSignal[k] = epg.GetMagFa(0);
         if(k%10 == 0)
         std::cout << "Signal after pulse " << (k+1) << ": " << vSignal[k] << std::endl;
     }
